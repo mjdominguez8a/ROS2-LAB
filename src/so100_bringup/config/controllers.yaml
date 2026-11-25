@@ -1,0 +1,43 @@
+controller_manager:
+  ros__parameters:
+    update_rate: 50  # Hz
+
+    joint_state_broadcaster:
+      type: joint_state_broadcaster/JointStateBroadcaster
+    joint_trajectory_controller:
+      type: joint_trajectory_controller/JointTrajectoryController
+    forward_position_controller:
+      type: position_controllers/JointGroupPositionController
+    gripper_controller:
+      type: parallel_gripper_action_controller/GripperActionController
+
+joint_trajectory_controller:
+  ros__parameters:
+    joints: [shoulder_pan_joint, shoulder_lift_joint, elbow_flex_joint, wrist_flex_joint, wrist_roll_joint]
+    command_interfaces: [position]
+    state_interfaces: [position, velocity]
+    allow_partial_joints_goal: false
+    # A goal only succeeds once every joint is within `goal` rad of the final point
+    # (checked for up to goal_time s after the trajectory ends).
+    constraints:
+      stopped_velocity_tolerance: 0.05
+      goal_time: 2.0
+      shoulder_pan_joint: {goal: 0.03}
+      shoulder_lift_joint: {goal: 0.03}
+      elbow_flex_joint: {goal: 0.03}
+      wrist_flex_joint: {goal: 0.03}
+      wrist_roll_joint: {goal: 0.03}
+
+forward_position_controller:
+  ros__parameters:
+    joints: [shoulder_pan_joint, shoulder_lift_joint, elbow_flex_joint, wrist_flex_joint, wrist_roll_joint]
+
+gripper_controller:
+  ros__parameters:
+    joint: gripper_joint
+    allow_stalling: true
+
+# Gazebo only: how hard simulated joints track position commands (default 0.1 is soft/laggy).
+gz_ros_control:
+  ros__parameters:
+    position_proportional_gain: 0.5

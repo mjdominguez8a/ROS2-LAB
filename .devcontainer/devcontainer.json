@@ -1,0 +1,60 @@
+{
+  "name": "ROS 2 Jazzy - SO-100 Lab",
+  "build": {
+    "dockerfile": "Dockerfile",
+    "context": ".",
+    // Prebuilt by .github/workflows/image.yml. If it can't be pulled, the image is built from scratch.
+    "cacheFrom": "ghcr.io/nearlab-mrs/medrob-workshop-ros2:jazzy"
+  },
+
+  "features": {
+    "ghcr.io/devcontainers/features/desktop-lite:1": {
+      "password": "vscode",
+      "webPort": "6080",
+      "vncPort": "5901"
+    },
+    "ghcr.io/devcontainers/features/sshd:1": {}
+  },
+
+  "remoteUser": "ubuntu",
+  "runArgs": ["--shm-size=1g"],
+
+  "hostRequirements": { "cpus": 4, "memory": "16gb" },
+
+  "remoteEnv": {
+    "DISPLAY": ":1",
+    "LIBGL_ALWAYS_SOFTWARE": "1",
+    "ROS_AUTOMATIC_DISCOVERY_RANGE": "LOCALHOST"
+  },
+
+  "forwardPorts": [6080],
+  "portsAttributes": {
+    "6080": {
+      "label": "ROS Desktop (RViz / Gazebo / turtlesim)",
+      "onAutoForward": "notify"
+    }
+  },
+
+  "postCreateCommand": "bash .devcontainer/post-create.sh",
+
+  "customizations": {
+    "codespaces": {
+      "openFiles": ["README.md"]
+    },
+    "vscode": {
+      "extensions": [
+        "ms-python.python",
+        "ms-vscode.cpptools",
+        "redhat.vscode-xml",
+        "redhat.vscode-yaml"
+      ],
+      "settings": {
+        "terminal.integrated.defaultProfile.linux": "bash",
+        "python.analysis.extraPaths": ["/opt/ros/jazzy/lib/python3.12/site-packages"],
+        "python.testing.pytestEnabled": true,
+        "python.testing.pytestArgs": ["src/so100_labs/test", "src/lab_starter/test"],
+        "files.exclude": { "build": true, "install": true, "log": true }
+      }
+    }
+  }
+}

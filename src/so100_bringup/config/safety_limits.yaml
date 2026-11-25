@@ -1,0 +1,10 @@
+# Limits enforced on the REAL robot by `safety_monitor` (and by so100_labs.arm.ArmClient).
+# Tighter than the URDF on purpose. If a joint leaves its range or moves faster
+# than max_velocity, the monitor stops the trajectory and the arm holds position.
+safety_monitor:
+  ros__parameters:
+    joints: [shoulder_pan_joint, shoulder_lift_joint, elbow_flex_joint, wrist_flex_joint, wrist_roll_joint]
+    lower: [-1.9, -1.7, -1.55, -1.8, -1.0]
+    upper: [ 1.9,  1.7,  1.55,  0.2,  4.0]
+    margin: 0.05          # rad of slack before tripping
+    max_velocity: 1.5     # rad/s, any joint

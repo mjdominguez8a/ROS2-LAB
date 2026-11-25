@@ -1,0 +1,15 @@
+# Real robot only: loaded after controllers.yaml by `arm.launch.py backend:=real`.
+#
+# The servos hold position with their own P-only controller, so under gravity a loaded joint
+# settles a few degrees short of its target (measured on arm3 with p_coefficient 32:
+# shoulder_lift 0.044 rad, elbow_flex up to 0.064 rad). With the simulation tolerance of 0.03 rad
+# every trajectory was aborted after `goal_time`, and on abort the controller holds the *measured*
+# (sagged) pose, which makes the arm step down a little more.
+joint_trajectory_controller:
+  ros__parameters:
+    constraints:
+      shoulder_pan_joint: {goal: 0.08}
+      shoulder_lift_joint: {goal: 0.08}
+      elbow_flex_joint: {goal: 0.08}
+      wrist_flex_joint: {goal: 0.08}
+      wrist_roll_joint: {goal: 0.08}

@@ -1,0 +1,33 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "colcon: build",
+      "type": "shell",
+      "command": "source /opt/ros/jazzy/setup.bash && colcon build --symlink-install",
+      "group": { "kind": "build", "isDefault": true },
+      "problemMatcher": []
+    },
+    {
+      "label": "SO-100: unit tests (all tasks)",
+      "type": "shell",
+      "command": "source install/setup.bash && python3 -m pytest -q -p no:cacheprovider src/so100_labs/test",
+      "group": "test",
+      "problemMatcher": []
+    },
+    {
+      "label": "SO-100: simulation tests (all tasks)",
+      "type": "shell",
+      "command": "source install/setup.bash && SO100_SIM_TESTS=1 python3 -m pytest -v -p no:cacheprovider src/so100_labs/test/integration",
+      "group": "test",
+      "problemMatcher": []
+    },
+    {
+      "label": "Turtle labs: tests",
+      "type": "shell",
+      "command": "source /opt/ros/jazzy/setup.bash && colcon test --packages-select lab_starter && colcon test-result --verbose",
+      "group": "test",
+      "problemMatcher": []
+    }
+  ]
+}

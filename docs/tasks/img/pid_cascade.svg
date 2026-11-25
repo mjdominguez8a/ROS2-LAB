@@ -1,0 +1,104 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 560" font-family="Helvetica, Arial, sans-serif" font-size="17">
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#222"/>
+    </marker>
+    <marker id="arrow-red" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto">
+      <path d="M0,0 L10,5 L0,10 z" fill="#c0392b"/>
+    </marker>
+    <marker id="arrow-grey" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto">
+      <path d="M0,0 L10,5 L0,10 z" fill="#777"/>
+    </marker>
+  </defs>
+  <rect width="1200" height="560" fill="#ffffff"/>
+
+  <!-- regions -->
+  <rect x="150" y="30" width="460" height="300" rx="10" fill="#dceaf9" stroke="#6a9bd8" stroke-width="2" stroke-dasharray="7 5"/>
+  <text x="380" y="58" text-anchor="middle" font-weight="bold" font-size="19">OUTER LOOP: your code (Task 6)</text>
+  <text x="380" y="82" text-anchor="middle">Joint space, 20 Hz, Python + ROS 2</text>
+
+  <rect x="630" y="30" width="450" height="300" rx="10" fill="#d6f1ec" stroke="#4fb3a5" stroke-width="2" stroke-dasharray="7 5"/>
+  <text x="855" y="58" text-anchor="middle" font-weight="bold" font-size="19">INNER LOOP: inside each servo</text>
+  <text x="855" y="82" text-anchor="middle">P-only position control (STS3215 firmware)</text>
+
+  <!-- input -->
+  <text x="20" y="190">Target</text>
+  <text x="20" y="212">joints q<tspan font-size="12" dy="4">d</tspan></text>
+  <text x="20" y="238" font-size="13" fill="#555">(IK, Task 4)</text>
+  <line x1="120" y1="200" x2="170" y2="200" stroke="#222" stroke-width="2" marker-end="url(#arrow)"/>
+
+  <!-- feed-forward of q_d -->
+  <polyline points="140,200 140,118 540,118 540,180" fill="none" stroke="#222" stroke-width="2" marker-end="url(#arrow)"/>
+  <text x="340" y="110" text-anchor="middle" font-size="15">q<tspan font-size="11" dy="4">d</tspan><tspan dy="-4"> (passed straight through)</tspan></text>
+
+  <!-- sum 1 -->
+  <circle cx="190" cy="200" r="18" fill="#fff" stroke="#222" stroke-width="2"/>
+  <text x="160" y="188" font-size="18">+</text>
+  <text x="196" y="246" font-size="20">−</text>
+  <line x1="208" y1="200" x2="272" y2="200" stroke="#222" stroke-width="2" marker-end="url(#arrow)"/>
+  <text x="240" y="190" text-anchor="middle">e</text>
+
+  <!-- PID -->
+  <rect x="272" y="158" width="150" height="84" rx="4" fill="#b8d3f2" stroke="#333" stroke-width="2"/>
+  <text x="347" y="188" text-anchor="middle" font-weight="bold">Your PID</text>
+  <text x="347" y="210" text-anchor="middle" font-size="14">kp·e + ki∫e dt</text>
+  <text x="347" y="229" text-anchor="middle" font-size="14">− kd·dq/dt</text>
+  <line x1="422" y1="200" x2="520" y2="200" stroke="#222" stroke-width="2" marker-end="url(#arrow)"/>
+  <text x="470" y="190" text-anchor="middle">u</text>
+  <text x="470" y="224" text-anchor="middle" font-size="13" fill="#555">correction</text>
+
+  <!-- sum 2 -->
+  <circle cx="540" cy="200" r="18" fill="#fff" stroke="#222" stroke-width="2"/>
+  <text x="506" y="190" font-size="18">+</text>
+  <text x="548" y="176" font-size="18">+</text>
+  <line x1="558" y1="200" x2="690" y2="200" stroke="#222" stroke-width="2" marker-end="url(#arrow)"/>
+  <text x="588" y="190" text-anchor="middle">q<tspan font-size="12" dy="4">cmd</tspan></text>
+  <text x="515" y="262" text-anchor="middle" font-size="13" fill="#555">q<tspan font-size="10" dy="3">cmd</tspan><tspan dy="-3"> = q</tspan><tspan font-size="10" dy="3">d</tspan><tspan dy="-3"> + u, sent with</tspan></text>
+  <text x="515" y="280" text-anchor="middle" font-size="13" fill="#555">arm.stream_position()</text>
+
+  <!-- sum 3 (inside servo) -->
+  <circle cx="710" cy="200" r="18" fill="#fff" stroke="#222" stroke-width="2"/>
+  <text x="680" y="188" font-size="18">+</text>
+  <text x="716" y="246" font-size="20">−</text>
+  <line x1="728" y1="200" x2="764" y2="200" stroke="#222" stroke-width="2" marker-end="url(#arrow)"/>
+
+  <!-- servo controller -->
+  <rect x="764" y="158" width="140" height="84" rx="4" fill="#7fcfc3" stroke="#333" stroke-width="2"/>
+  <text x="834" y="188" text-anchor="middle" font-weight="bold">Servo P</text>
+  <text x="834" y="208" text-anchor="middle" font-weight="bold">controller</text>
+  <text x="834" y="229" text-anchor="middle" font-size="14">K·(q<tspan font-size="10" dy="3">cmd</tspan><tspan dy="-3"> − q)</tspan></text>
+  <line x1="904" y1="200" x2="948" y2="200" stroke="#222" stroke-width="2" marker-end="url(#arrow)"/>
+  <text x="926" y="190" text-anchor="middle" font-size="14">PWM</text>
+
+  <!-- arm mechanics -->
+  <rect x="948" y="158" width="122" height="84" rx="4" fill="#7fcfc3" stroke="#333" stroke-width="2"/>
+  <text x="1009" y="185" text-anchor="middle" font-weight="bold">Motor,</text>
+  <text x="1009" y="205" text-anchor="middle" font-weight="bold">gears &amp;</text>
+  <text x="1009" y="225" text-anchor="middle" font-weight="bold">links</text>
+
+  <!-- gravity disturbance -->
+  <line x1="1009" y1="104" x2="1009" y2="156" stroke="#c0392b" stroke-width="2.5" marker-end="url(#arrow-red)"/>
+  <text x="1000" y="125" text-anchor="end" fill="#c0392b" font-weight="bold">gravity τ<tspan font-size="12" dy="4">g</tspan><tspan dy="-4">(q)</tspan></text>
+
+  <!-- output -->
+  <line x1="1070" y1="200" x2="1185" y2="200" stroke="#222" stroke-width="2" marker-end="url(#arrow)"/>
+  <text x="1130" y="172" text-anchor="middle">Actual</text>
+  <text x="1130" y="190" text-anchor="middle">joints q</text>
+
+  <!-- inner feedback -->
+  <polyline points="1009,242 1009,292 710,292 710,220" fill="none" stroke="#222" stroke-width="2" marker-end="url(#arrow)"/>
+  <text x="860" y="314" text-anchor="middle">encoder (inside the servo)</text>
+
+  <!-- outer feedback -->
+  <polyline points="1120,200 1120,390 190,390 190,220" fill="none" stroke="#222" stroke-width="2" marker-end="url(#arrow)"/>
+  <text x="655" y="380" text-anchor="middle">/joint_states: measured q, read over the serial bus (50 Hz)</text>
+
+  <!-- FK for evaluation -->
+  <polyline points="1120,390 1120,470 760,470" fill="none" stroke="#777" stroke-width="2" stroke-dasharray="6 5" marker-end="url(#arrow-grey)"/>
+  <rect x="600" y="440" width="160" height="60" rx="4" fill="#eef3f9" stroke="#777" stroke-width="2" stroke-dasharray="6 5"/>
+  <text x="680" y="466" text-anchor="middle" fill="#444" font-weight="bold">FK (Task 3)</text>
+  <text x="680" y="488" text-anchor="middle" fill="#444" font-size="14">TCP position</text>
+  <line x1="600" y1="470" x2="470" y2="470" stroke="#777" stroke-width="2" stroke-dasharray="6 5" marker-end="url(#arrow-grey)"/>
+  <text x="460" y="465" text-anchor="end" fill="#444">TCP error in mm</text>
+  <text x="460" y="486" text-anchor="end" fill="#777" font-size="14">(logged to compare, not used for control)</text>
+</svg>

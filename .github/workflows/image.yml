@@ -1,0 +1,40 @@
+# Prebuilds the full dev container (ROS + desktop) and pushes it to GHCR.
+# devcontainer.json uses it as a build cache, so codespaces start in ~1-2 minutes.
+# Only runs in the original template repo, not in students' copies.
+name: Build dev container image
+
+on:
+  push:
+    branches: [main]
+    paths: ['.devcontainer/**', '.github/workflows/image.yml']
+  schedule:
+    - cron: '0 3 * * 1'   # weekly, to pick up ROS security/bug-fix updates
+  workflow_dispatch:
+
+jobs:
+  build:
+    if: github.repository == 'NEARLab-MRS/medrob-workshop-ros2'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Free disk space (the image is ~6 GB)
+        run: sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc /opt/hostedtoolcache/CodeQL
+
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push dev container
+        uses: devcontainers/ci@v0.3
+        with:
+          subFolder: .
+          imageName: ghcr.io/nearlab-mrs/medrob-workshop-ros2   # GHCR names must be lowercase
+          imageTag: jazzy
+          cacheFrom: ghcr.io/nearlab-mrs/medrob-workshop-ros2:jazzy
+          push: always

@@ -1,0 +1,52 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
+  <xacro:macro name="so100_ros2_control" params="backend usb_port calibration_file">
+    <xacro:property name="cal" value="${xacro.load_yaml(calibration_file)}" />
+    <ros2_control name="SO100" type="system">
+      <hardware>
+        <xacro:if value="${backend == 'mock'}">
+          <plugin>mock_components/GenericSystem</plugin>
+          <param name="calculate_dynamics">true</param>
+        </xacro:if>
+        <xacro:if value="${backend == 'gazebo'}">
+          <plugin>gz_ros2_control/GazeboSimSystem</plugin>
+        </xacro:if>
+        <xacro:if value="${backend == 'real'}">
+          <plugin>feetech_ros2_driver/FeetechHardwareInterface</plugin>
+          <param name="usb_port">${usb_port}</param>
+          <!-- Servo settings as in LeRobot's SO-100 setup. Acceleration 254 = no ramp in the servo:
+               it follows the controller's (already smooth) trajectory instead of lagging behind it. -->
+          <param name="acceleration">254</param>
+          <param name="max_speed">2400</param>
+        </xacro:if>
+      </hardware>
+      <xacro:macro name="so100_joint" params="name">
+        <joint name="${name}">
+          <param name="id">${cal['joints'][name]['id']}</param>
+          <param name="offset">${cal['joints'][name]['offset']}</param>
+          <param name="p_cofficient">${cal['joints'][name]['p_coefficient']}</param>
+          <param name="d_cofficient">32</param>
+          <param name="i_cofficient">0</param>
+          <param name="return_delay_time">0</param>
+          <xacro:if value="${name == 'gripper_joint'}">
+            <!-- LeRobot: keep the gripper from burning out when it squeezes an object -->
+            <param name="max_torque_limit">500</param>
+            <param name="protection_current">250</param>
+            <param name="overload_torque">25</param>
+          </xacro:if>
+          <command_interface name="position" />
+          <state_interface name="position">
+            <param name="initial_value">${cal['joints'][name]['initial_position']}</param>
+          </state_interface>
+          <state_interface name="velocity" />
+        </joint>
+      </xacro:macro>
+      <xacro:so100_joint name="shoulder_pan_joint" />
+      <xacro:so100_joint name="shoulder_lift_joint" />
+      <xacro:so100_joint name="elbow_flex_joint" />
+      <xacro:so100_joint name="wrist_flex_joint" />
+      <xacro:so100_joint name="wrist_roll_joint" />
+      <xacro:so100_joint name="gripper_joint" />
+    </ros2_control>
+  </xacro:macro>
+</robot>

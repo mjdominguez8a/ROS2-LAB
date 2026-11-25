@@ -1,0 +1,94 @@
+# Builds the workspace and checks each lab on every push.
+# Each task is a separate job, so you see e.g. "Task 2 ✓  Task 3 ✗" on GitHub.
+#   unit tests : pure Python, src/so100_labs/test/test_taskN_*.py
+#   sim test   : runs your node against the simulated arm (mock hardware, no GUI)
+#
+# In the original template repo, the exercises are TODO stubs, so the instructor's private
+# reference solutions are copied in first: green there means exercises and tests are consistent.
+# Students' copies (any other repository) always test the student's own code.
+name: Labs
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  lab:
+    name: ${{ matrix.name }}
+    runs-on: ubuntu-latest
+    container: ros:jazzy
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { name: 'Task 0 - turtle circle', task: task0 }
+          - { name: 'Task 1 - joint commands', task: task1 }
+          - { name: 'Task 2 - trajectories', task: task2 }
+          - { name: 'Task 3 - forward kinematics', task: task3 }
+          - { name: 'Task 4 - inverse kinematics', task: task4 }
+          - { name: 'Task 5 - Cartesian paths', task: task5 }
+          - { name: 'Task 6 - PID control', task: task6 }
+    defaults:
+      run:
+        shell: bash
+    env:
+      IS_TEMPLATE: ${{ github.repository == 'NEARLab-MRS/medrob-workshop-ros2' }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install ssh client for the solutions checkout (template repo only)
+        if: env.IS_TEMPLATE == 'true'
+        run: apt-get update && apt-get install -y --no-install-recommends openssh-client
+
+      - name: Use reference solutions (template repo only)
+        if: env.IS_TEMPLATE == 'true'
+        uses: actions/checkout@v4
+        with:
+          repository: bfortuno/ros2-student-lab-solutions
+          # explicit ref: otherwise checkout asks the REST API for the default branch using
+          # GITHUB_TOKEN, which cannot see the private repo (only the deploy key can)
+          ref: main
+          ssh-key: ${{ secrets.SOLUTIONS_DEPLOY_KEY }}
+          path: _solutions
+
+      - name: Copy solutions over the stubs (template repo only)
+        if: env.IS_TEMPLATE == 'true'
+        run: |
+          cp _solutions/so100_labs/task*.py src/so100_labs/so100_labs/
+          cp _solutions/lab_starter/turtle_circle.py src/lab_starter/lab_starter/
+          rm -rf _solutions
+
+      - name: Install dependencies
+        run: |
+          apt-get update
+          apt-get install -y --no-install-recommends python3-pytest python3-numpy \
+            ros-jazzy-turtlesim ros-jazzy-ros2-control ros-jazzy-ros2-controllers \
+            ros-jazzy-xacro ros-jazzy-robot-state-publisher ros-jazzy-tf2-ros-py \
+            ros-jazzy-nav2-common
+
+      - name: Build
+        run: |
+          source /opt/ros/jazzy/setup.bash
+          # feetech_ros2_driver (real robot only) needs libserial etc., which ros:jazzy lacks.
+          # --packages-ignore, not --packages-skip: skip would expect it to be installed already.
+          colcon build --symlink-install \
+            --packages-up-to lab_starter so100_labs so100_bringup so_arm100_description \
+            --packages-ignore feetech_ros2_driver
+
+      - name: Unit tests
+        run: |
+          source install/setup.bash
+          if [ "${{ matrix.task }}" = task0 ]; then
+            python3 -m pytest -v -p no:cacheprovider src/lab_starter/test
+          else
+            python3 -m pytest -v -p no:cacheprovider src/so100_labs/test/test_${{ matrix.task }}_*.py
+          fi
+
+      - name: Simulation test
+        if: matrix.task != 'task0'
+        env:
+          SO100_SIM_TESTS: '1'
+        run: |
+          source install/setup.bash
+          python3 -m pytest -v -s -p no:cacheprovider src/so100_labs/test/integration -k ${{ matrix.task }}

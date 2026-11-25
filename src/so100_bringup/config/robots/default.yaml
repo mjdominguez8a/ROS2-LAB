@@ -1,0 +1,16 @@
+# Servo calibration for one physical SO-100.
+# `offset` = raw servo reading (0..4095) when the joint is at 0 rad (the pose
+# shown in RViz with every joint at zero). Generate a file per robot with:
+#   ros2 run so100_bringup calibrate --robot-id <name>
+# These defaults come from ros2_so_arm100 and are only a starting point.
+# `initial_position` is used by the mock and Gazebo backends only.
+# `p_coefficient` is the servo's position gain. 32 (the servo default) on the joints that carry the
+# arm's weight keeps the gravity sag to ~2-4 deg; lower values sag more, higher ones buzz and heat up.
+robot_id: default
+joints:
+  shoulder_pan_joint:  {id: 1, offset: 2048, p_coefficient: 16, initial_position: 0.0}
+  shoulder_lift_joint: {id: 2, offset: 2125, p_coefficient: 32, initial_position: 0.0}
+  elbow_flex_joint:    {id: 3, offset: 2080, p_coefficient: 32, initial_position: 0.0}
+  wrist_flex_joint:    {id: 4, offset: 3110, p_coefficient: 32, initial_position: 0.0}
+  wrist_roll_joint:    {id: 5, offset: 1024, p_coefficient: 16, initial_position: 0.0}
+  gripper_joint:       {id: 6, offset: 2070, p_coefficient: 16, initial_position: 0.0}
